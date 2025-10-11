@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/bootstrap.bundle.min.js"></script>
@@ -19,8 +19,33 @@
 
 
     <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+
+        .container-fluid {
+            flex: 1;
+        }
+
+
+        footer {
+            width: 100%;
+            margin: 10px;
+            padding: 15px 0;
+            background: #222;
+            color: white;
+            text-align: center;
+            margin-top: 60px auto;
+        }
+
         .btn {
-            
+
             background-color: #ff6f91;
             color: white;
             padding: 12px 28px;
@@ -68,31 +93,46 @@
         .custome-dropdown ::after {
             display: none;
         }
+
+        @media (max-width: 576px) {
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .dropdown-menu {
+                width: auto;
+                padding: 10px;
+            }
+        }
+
+        .main-content {
+            flex: 1;
+        }
     </style>
 </head>
 
 <body>
     <div class="container-fluid">
-
         <!--first row-->
         <div class="row">
             <!--NAVBAR-->
             <nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
-                <div class="container">
+                <div class="container-fluid">
                     <a class="navbar-brand" href="javascript:void(0)">🌷<b>Flowers</b></a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="mynavbar">
-                        <ul class="navbar-nav me-auto">
+                        <ul class="navbar-nav me-auto mb-2 mb-md-0">
 
                             <li class="nav-item">
                                 <a class="nav-link" href="home.php"> Home </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#"> Product </a>
+                                <a class="nav-link" href="category.php"> Category </a>
                             </li>
 
                             <li class="nav-item">
@@ -109,8 +149,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="login.php"> Login </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="feedback.php"> Feedback </a>
+                            </li>
                             <!--dropdown-->
-                            <li class="nav-item dropdown">
+                            <!--<li class="nav-item dropdown">
                                 <a class="nav-link dropdown" href="#" data-bs-toggle="dropdown">
                                     <img src="images/user.png" alt="user 3" width="20px" height="20px">
                                 </a>
@@ -121,18 +164,18 @@
                                     </li>
                                 </ul>
 
-                            </li>
+                            </li>-->
                         </ul>
-                        <form class="d-flex">
+                        <!--<form class="d-flex">
                             <input class="form-control me-2" type="text" placeholder="Search">
                             <button class="btn" type="button">Search</button>
-                        </form>
+                        </form>-->
                     </div>
                 </div>
             </nav>
         </div>
 
-<!--dynamic content-->
+        <!--dynamic content-->
         <!--second row-->
         <div class="row">
             <?php
@@ -150,12 +193,16 @@
         <!--third row-->
         <div class="main-content">
             <div class="row">
-                <!--FOOTER-->
+
+               
+                        <!--FOOTER-->
                 <footer class="bg-dark text-white text-center py-3 w-100 m-0">
                     <p>© 2025 Flower Shop | Designed by [Diya Apte] [Hiral Jadav] [Jagruti Sagathiya]</p>
 
                 </footer>
+                
             </div>
+
         </div>
     </div>
 </body>
