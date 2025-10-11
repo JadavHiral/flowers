@@ -5,6 +5,7 @@ ob_start();
 
 
 <head>
+
   <style>
     /* Hero Section */
     .hero {
@@ -25,7 +26,43 @@ ob_start();
       font-size: 1.2em;
       margin-bottom: 25px;
     }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 60px 15px;
+        height: auto;
+      }
+
+      .hero h2 {
+        font-size: 2em;
+      }
+
+      .hero p {
+        font-size: 1em;
+      }
+    }
+
+    .card-title {
+      font-size: 1.1em;
+    }
+
+    .card img {
+      max-height: 250px;
+      object-fit: cover;
+    }
+
+    .card {
+      height: 100%;
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
   </style>
+</head>
+</style>
 </head>
 
 <body>
@@ -36,7 +73,7 @@ ob_start();
     <h2>Fresh Blooms Delivered With Love</h2>
     <p>Discover our handpicked collection of flowers for every occasion.</p>
     <p> Fresh Flowers, Fresh Smiles.😊</p>
-    <a href="#" class="btn">Shop Now</a>
+    <a href="category.php" class="btn">Shop Now</a>
   </section>
 
 
@@ -46,23 +83,23 @@ ob_start();
   </marquee>
 
 
-  <!--card images-->
   <div class="container my-5">
-    <div class="row">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+
       <!-- Card 1 -->
-      <div class="col-sm-6 col-md-4 mb-4">
-        <div class="card">
-          <img src="images/lotus2.jpg" class="card-img-top" alt="Flower 1">
+      <div class="col">
+        <div class="card h-100">
+          <img src="images/plants/flowerplant2.jpg" class="card-img-top img-fluid" alt="Flower 1">
           <div class="card-body text-center">
-            <h5 class="card-title"><b>Lotus</b></h5>
+            <h5 class="card-title"><b>Flower Plant</b></h5>
           </div>
         </div>
       </div>
 
       <!-- Card 2 -->
-      <div class="col-sm-6 col-md-4 mb-4">
-        <div class="card">
-          <img src="images/tulipbasket.jpg" class="card-img-top" alt="Flower 2">
+      <div class="col">
+        <div class="card h-100">
+          <img src="images/tulipbasket.jpg" class="card-img-top img-fluid" alt="Flower 2">
           <div class="card-body text-center">
             <h5 class="card-title"><b>Tulip Bouquet</b></h5>
           </div>
@@ -70,21 +107,19 @@ ob_start();
       </div>
 
       <!-- Card 3 -->
-      <div class="col-sm-6 col-md-4 mb-4">
-        <div class="card">
-          <img src="images/rose.jpg" class="card-img-top" alt="Flower 3">
+      <div class="col">
+        <div class="card h-100">
+          <img src="images/rose.jpg" class="card-img-top img-fluid" alt="Flower 3">
           <div class="card-body text-center">
             <h5 class="card-title"><b>Pink Rose</b></h5>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="row">
       <!-- Card 4 -->
-      <div class="col-sm-6 col-md-4 mb-4">
-        <div class="card">
-          <img src="images/flowerpot.jpg" class="card-img-top" alt="Flower 4">
+      <div class="col">
+        <div class="card h-100">
+          <img src="images/flowerpot.jpg" class="card-img-top img-fluid" alt="Flower 4">
           <div class="card-body text-center">
             <h5 class="card-title"><b>Flower Pot</b></h5>
           </div>
@@ -92,9 +127,9 @@ ob_start();
       </div>
 
       <!-- Card 5 -->
-      <div class="col-sm-6 col-md-4 mb-4">
-        <div class="card">
-          <img src="images/redtulip.jpg" class="card-img-top" alt="Flower 5">
+      <div class="col">
+        <div class="card h-100">
+          <img src="images/redtulip.jpg" class="card-img-top img-fluid" alt="Flower 5">
           <div class="card-body text-center">
             <h5 class="card-title"><b>Red Tulip</b></h5>
           </div>
@@ -102,16 +137,18 @@ ob_start();
       </div>
 
       <!-- Card 6 -->
-      <div class="col-sm-6 col-md-4 mb-4">
-        <div class="card">
-          <img src="images/white.jpg" class="card-img-top" alt="Flower 6">
+      <div class="col">
+        <div class="card h-100">
+          <img src="images/plants/plantimg2.jpg" class="card-img-top img-fluid" alt="Flower 6">
           <div class="card-body text-center">
-            <h5 class="card-title"><b>White Rose</b></h5>
+            <h5 class="card-title"><b>Indoor Plants</b></h5>
           </div>
         </div>
       </div>
+
     </div>
   </div>
+
 
   <?php
   $content1 = ob_get_clean();
