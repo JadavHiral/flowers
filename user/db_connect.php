@@ -4,7 +4,7 @@
 $host = "localhost";      // usually localhost for XAMPP
 $user = "root";           // default MySQL username
 $pass = "";               // default password for XAMPP is empty
-$dbname = "flower_db";   // ✅ your database name
+$dbname = "flower_db";   // database name
 
 // Create connection
 $conn = new mysqli($host, $user, $pass, $dbname);
@@ -25,4 +25,5 @@ else{
 
 // echo "Database connected successfully!";
 ?>
+
 
