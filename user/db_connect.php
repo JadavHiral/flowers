@@ -4,7 +4,7 @@
 $host = "localhost";      // usually localhost for XAMPP
 $user = "root";           // default MySQL username
 $pass = "";               // default password for XAMPP is empty
-$dbname = "wardrobe_db";   // ✅ your database name
+$dbname = "flower_db";   // ✅ your database name
 
 // Create connection
 $conn = new mysqli($host, $user, $pass, $dbname);
@@ -22,6 +22,7 @@ if ($conn->connect_error) {
 else{
     echo"error";
 }*/
-// Optional: Uncomment to test connection
+
 // echo "Database connected successfully!";
 ?>
+
