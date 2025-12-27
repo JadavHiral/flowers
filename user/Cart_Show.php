@@ -1,393 +1,254 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 ob_start();
+session_start();
+include_once("db_config.php"); // DB connection
+
+// Get logged-in username, default 'guest'
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : 'guest';
+
+// Fetch cart items
+$stmt = $con->prepare("SELECT * FROM add_to_cart WHERE username=?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$cartItems = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <style>
-  /* ==============================
-     Cart Show Page Styling - Improved
-     ============================== */
-
-  body {
-    background: #f8fafb;
+body {
+    margin: 0;
+    padding: 0;
+    background: #fff0f6;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
+    color: #880e4f;
+}
 
-  /* Container Box */
-  .box-container {
-    max-width: 900px;
+.container {
+    max-width: 1200px;
     margin: 40px auto;
-    background-color: #fff;
-    padding: 30px 35px;
-    border-radius: 15px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+    padding: 20px;
+    background-color: #fce4ec;
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(233, 30, 99, 0.1);
+}
 
-  .box-container:hover {
-    transform: scale(1.02);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-  }
-
-  /* Page Title */
-  h2.text-center {
-    color: #198754;
+h2 {
+    text-align: center;
     font-weight: 700;
-    font-size: 2.4rem;
+    font-size: 2.2rem;
     margin-bottom: 30px;
-  }
+    color: #ad1457;
+}
 
-  /* Cart Table */
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+.cart-grid {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
 
-  .table thead {
-    background-color: #198754;
-    color: #fff;
-    font-weight: 700;
-  }
-
-  .table th,
-  .table td {
-    padding: 14px 20px;
-    text-align: center;
-    border-bottom: 1px solid #e5e5e5;
-    font-size: 1rem;
-    vertical-align: middle;
-    word-break: break-word;
-  }
-
-  /* Product name aligned left */
-  .table td:first-child {
-    text-align: left;
-    font-weight: 600;
-    color: #145c32;
-  }
-
-  /* Hover effect on rows */
-  .table tbody tr:hover {
-    background-color: #e6f4ea;
-  }
-
-  /* Buttons */
-  .btn {
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 10px 18px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-primary {
-    background-color: #198754;
-    border-color: #198754;
-    color: #fff;
-  }
-
-  .btn-primary:hover {
-    background-color: #146c43;
-    border-color: #146c43;
-    box-shadow: 0 6px 15px rgba(20, 108, 67, 0.6);
-  }
-
-  .btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: #fff;
-  }
-
-  .btn-danger:hover {
-    background-color: #a52732;
-    border-color: #a52732;
-    box-shadow: 0 6px 15px rgba(165, 39, 50, 0.6);
-  }
-
-  /* Form inputs styling */
-  .form-control,
-  .form-select {
-    border-radius: 8px;
-    border: 1px solid #ced4da;
-    padding: 10px 12px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #198754;
-    box-shadow: 0 0 8px rgba(25, 135, 84, 0.3);
-    outline: none;
-  }
-
-  /* Textarea adjustment */
-  textarea.form-control {
-    resize: vertical;
-  }
-
-  /* Total price styling */
-  .cart-total {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #198754;
-    text-align: right;
-    margin-top: 15px;
-  }
-
-  /* Action buttons container */
-  .text-center.mt-3,
-  .text-center.mt-4 {
-    margin-top: 20px;
+.cart-item {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(214, 51, 108, 0.1);
     display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+    flex-direction: column;
+    align-items: center;
+}
 
-  /* Empty Cart Styling */
-  .empty-cart {
+.cart-item img {
+    width: 100%;
+    height: 200px;           /* uniform height */
+    object-fit: contain;      /* no cropping */
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #fff0f6;      /* optional background for smaller images */
+}
+
+.cart-item h4 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    color: #6a1b4d;
     text-align: center;
-    color: #6c757d;
+}
+
+.cart-item p {
+    font-size: 1rem;
+    margin: 5px 0;
+    text-align: center;
+}
+
+.cart-item input[type="number"] {
+    width: 80px;
+    padding: 6px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #d6336c;
+    text-align: center;
+    margin: 10px auto;
+}
+
+.cart-item button {
+    background-color: #d81b60;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s ease;
+    margin: 10px auto 0;
+}
+
+.cart-item button:hover {
+    background-color: #a31549;
+}
+
+.grand-total-box {
+    margin-top: 40px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(233, 30, 99, 0.1);
+    text-align: center;
+}
+
+.grand-total-box .total {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #880e4f;
+}
+
+.grand-total-box .btn {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    margin: 6px 8px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #ad1457;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #880e4f;
+    box-shadow: 0 8px 20px rgba(136, 14, 79, 0.5);
+}
+
+.btn-danger {
+    background-color: #d81b60;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #a31549;
+    box-shadow: 0 8px 20px rgba(163, 21, 73, 0.5);
+}
+
+.empty-cart {
+    text-align: center;
+    font-size: 1.3rem;
     margin-top: 60px;
-  }
-
-  .empty-cart i {
-    font-size: 4rem;
-    margin-bottom: 15px;
-    color: #adb5bd;
-    transition: color 0.3s ease;
-  }
-
-  .empty-cart i:hover {
-    color: #198754;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .box-container {
-      padding: 25px 20px;
-    }
-
-    .table th,
-    .table td {
-      font-size: 0.9rem;
-      padding: 12px 10px;
-    }
-
-    .btn {
-      padding: 8px 14px;
-      font-size: 0.9rem;
-    }
-
-    h2.text-center {
-      font-size: 1.8rem;
-    }
-
-    .text-center.mt-3,
-    .text-center.mt-4 {
-      flex-direction: column;
-      gap: 10px;
-    }
-  }
+    color: #ad1457;
+}
 </style>
 
-<div class="container my-5">
-  <h2 class="text-center mb-4">🛒 Shopping Cart</h2>
+<div class="container">
+    <h2>🛒 Your Shopping Cart</h2>
 
-  <?php if (!empty($_SESSION['cart'])): ?>
+    <?php if (!empty($cartItems)): ?>
+        <form method="post" action="order.php">
+            <div class="cart-grid">
+                <?php
+                $grandTotal = 0;
+                foreach ($cartItems as $item):
+                    $itemTotal = $item['price'] * $item['qty'];
+                    $grandTotal += $itemTotal;
+                ?>
+                <div class="cart-item" data-id="<?= htmlspecialchars($item['cart_id']) ?>">
+                    <img src="<?= htmlspecialchars($item['img']) ?>" alt="<?= htmlspecialchars($item['pnm']) ?>">
+                    <h4><?= htmlspecialchars($item['pnm']) ?></h4>
+                    <p>Price: ₹<span class="item-price"><?= number_format($item['price'], 2) ?></span></p>
+                    <label>Quantity:
+                        <input type="number" name="quantities[<?= $item['cart_id'] ?>]" value="<?= (int)$item['qty'] ?>" min="1" class="qty-input">
+                    </label>
+                    <p>Total: ₹<span class="item-total"><?= number_format($itemTotal, 2) ?></span></p>
+                    <label>
+                        Select:
+                        <input type="checkbox" class="product-checkbox" name="selected_products[]" value="<?= $item['cart_id'] ?>" checked>
+                    </label>
+                    <button type="button" class="btn btn-danger btn-remove" data-id="<?= $item['cart_id'] ?>">Remove</button>
+                </div>
+                <?php endforeach; ?>
+            </div>
 
-    <!-- Cart Items Box -->
-    <div class="box-container">
-      <table class="table table-bordered align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Qty</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-          $grandTotal = 0;
-          foreach ($_SESSION['cart'] as $item):
-              $itemTotal = $item['price'] * $item['quantity'];
-              $grandTotal += $itemTotal;
-          ?>
-            <tr>
-              <td><?= htmlspecialchars($item['name']) ?></td>
-              <td>₹<?= number_format($item['price'], 2) ?></td>
-              <td><?= (int)$item['quantity'] ?></td>
-              <td>₹<?= number_format($itemTotal, 2) ?></td>
-            </tr>
-          <?php endforeach; ?>
-          <tr class="table-secondary fw-bold">
-            <td colspan="3" class="text-end">Grand Total</td>
-            <td>₹<?= number_format($grandTotal, 2) ?></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="text-center mt-3">
-        <a href="clear_cart.php" class="btn btn-danger me-2"><i class="fas fa-trash"></i> Clear Cart</a>
-        <a href="products.php" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to Products</a>
-      </div>
-    </div>
-
-    <!-- Order Form Box -->
-    <div class="box-container">
-      <h4 class="text-center mb-4">📦 Place Your Order</h4>
-      <form id="orderForm" action="order_process.php" method="post" novalidate>
-
-        <div class="mb-3">
-          <label for="name" class="form-label">Full Name *</label>
-          <input type="text" name="name" id="name" class="form-control" />
+            <div class="grand-total-box">
+                <div class="total">Grand Total: ₹<span id="grandTotal"><?= number_format($grandTotal, 2) ?></span></div>
+                <button type="submit" class="btn btn-primary">✅ Place Order</button>
+                <a href="clear_cart.php" class="btn btn-danger">🗑️ Clear Cart</a>
+                <a href="product.php" class="btn btn-primary">⬅️ Back to Products</a>
+            </div>
+        </form>
+    <?php else: ?>
+        <p class="empty-cart">Your cart is currently empty.</p>
+        <div style="text-align:center; margin-top: 20px;">
+            <a href="product.php" class="btn btn-primary">⬅️ Back to Products</a>
         </div>
-
-        <div class="mb-3">
-          <label for="email" class="form-label">Email *</label>
-          <input type="email" name="email" id="email" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label for="mobile" class="form-label">Mobile *</label>
-          <input type="text" name="mobile" id="mobile" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label for="address" class="form-label">Shipping Address *</label>
-          <textarea name="address" id="address" class="form-control" rows="3"></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label for="city" class="form-label">City *</label>
-          <input type="text" name="city" id="city" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label for="state" class="form-label">State *</label>
-          <input type="text" name="state" id="state" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label for="country" class="form-label">Country *</label>
-          <input type="text" name="country" id="country" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label for="pincode" class="form-label">Pincode *</label>
-          <input type="text" name="pincode" id="pincode" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label for="payment" class="form-label">Payment Method *</label>
-          <select name="payment" id="payment" class="form-select">
-            <option value="">-- Select --</option>
-            <option value="cod">Cash on Delivery</option>
-            <option value="online">Online Payment</option>
-          </select>
-        </div>
-
-        <div class="mb-3">
-          <label for="total" class="form-label">Total Amount (₹)</label>
-          <input type="text" name="total" id="total" class="form-control" value="<?= number_format($grandTotal, 2) ?>" readonly />
-        </div>
-
-        <div class="text-center mt-4">
-          <button type="submit" class="btn btn-success px-4">📦 Place Order</button>
-          <a href="clear_cart.php" class="btn btn-danger px-4 ms-2">❌ Cancel Order</a>
-        </div>
-
-      </form>
-    </div>
-
-    <!-- jQuery validation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-    <script>
-      $(document).ready(function () {
-        $("#orderForm").validate({
-          errorElement: 'div',
-          errorClass: 'error',
-          rules: {
-            name: {
-              required: true,
-              minlength: 3
-            },
-            email: {
-              required: true,
-              email: true
-            },
-            mobile: {
-              required: true,
-              digits: true,
-              minlength: 10,
-              maxlength: 10
-            },
-            address: {
-              required: true,
-              minlength: 10
-            },
-            city: {
-              required: true
-            },
-            state: {
-              required: true
-            },
-            country: {
-              required: true
-            },
-            pincode: {
-              required: true,
-              digits: true,
-              minlength: 6,
-              maxlength: 6
-            },
-            payment: {
-              required: true
-            }
-          },
-          messages: {
-            name: "Please enter your name (min 3 characters)",
-            email: "Enter a valid email",
-            mobile: "Enter a valid 10-digit mobile",
-            address: "Enter your full address (min 10 characters)",
-            city: "Enter your city",
-            state: "Enter your state",
-            country: "Enter your country",
-            pincode: "Enter a valid 6-digit pincode",
-            payment: "Select a payment method"
-          },
-          highlight: function (element) {
-            $(element).addClass('is-invalid');
-          },
-          unhighlight: function (element) {
-            $(element).removeClass('is-invalid');
-          },
-          submitHandler: function(form) {
-            form.submit();
-          }
-        });
-      });
-    </script>
-
-  <?php else: ?>
-    <!-- Empty Cart Box -->
-    <div class="box-container text-center">
-      <i class="fas fa-shopping-cart fa-2x mb-3 text-muted"></i>
-      <h4 class="mb-3 text-muted">Your cart is currently empty.</h4>
-      <a href="products.php" class="btn btn-primary mt-2"><i class="fas fa-arrow-left"></i> Back to Products</a>
-    </div>
-  <?php endif; ?>
+    <?php endif; ?>
 </div>
+
+<script>
+// Update item totals on quantity change
+document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('input', () => {
+        const item = input.closest('.cart-item');
+        const price = parseFloat(item.querySelector('.item-price').textContent);
+        let qty = parseInt(input.value);
+        if (isNaN(qty) || qty < 1) qty = 1;
+        input.value = qty;
+        const total = price * qty;
+        item.querySelector('.item-total').textContent = total.toFixed(2);
+        updateGrandTotal();
+    });
+});
+
+// Remove item from cart via AJAX
+document.querySelectorAll('.btn-remove').forEach(button => {
+    button.addEventListener('click', () => {
+        const cart_id = button.getAttribute('data-id');
+        fetch(`remove_from_cart.php?cart_id=${cart_id}`)
+            .then(() => {
+                button.closest('.cart-item').remove();
+                updateGrandTotal();
+            });
+    });
+});
+
+// Update grand total based on selected checkboxes
+document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', updateGrandTotal);
+});
+
+function updateGrandTotal() {
+    let total = 0;
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const checkbox = item.querySelector('.product-checkbox');
+        if (checkbox.checked) {
+            const itemTotal = parseFloat(item.querySelector('.item-total').textContent);
+            total += itemTotal;
+        }
+    });
+    document.getElementById('grandTotal').textContent = total.toFixed(2);
+}
+</script>
 
 <?php
 $Content1 = ob_get_clean();
-//$title_page = '<h1 class="text-center my-4">Shopping Cart</h1>';
-include 'layout.php';
+include_once("layout.php");
 ?>
