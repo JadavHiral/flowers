@@ -3,10 +3,14 @@ ob_start();
 session_start();
 include_once("db_config.php"); // DB connection
 
-// Get logged-in username, default 'guest'
-$username = isset($_SESSION['username']) ? $_SESSION['username'] : 'guest';
+// ✅ Correct session variable for logged-in user
+if (!isset($_SESSION['logged_in_user'])) {
+    header("Location: login.php");
+    exit;
+}
+$username = $_SESSION['logged_in_user']['username'];
 
-// Fetch cart items
+// Fetch cart items for this user
 $stmt = $con->prepare("SELECT * FROM add_to_cart WHERE username=?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -58,11 +62,11 @@ h2 {
 
 .cart-item img {
     width: 100%;
-    height: 200px;           /* uniform height */
-    object-fit: contain;      /* no cropping */
+    height: 200px;
+    object-fit: contain;
     border-radius: 8px;
     margin-bottom: 10px;
-    background: #fff0f6;      /* optional background for smaller images */
+    background: #fff0f6;
 }
 
 .cart-item h4 {
