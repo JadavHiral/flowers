@@ -1,64 +1,63 @@
-<!-- add_to_cart.php -->
-
-<style>
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to right, #e0f7fa, #f8f9fa);
-    color: #198754;
-  }
-  .message-box {
-    background: white;
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.2rem;
-  }
-</style>
-
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+session_start();
+include_once("db_config.php");
+
+// ✅ FIX IS HERE
+$username = isset($_SESSION['logged_in_user'])
+    ? $_SESSION['logged_in_user']['username']
+    : 'guest';
+
+$pid = isset($_GET['product']) ? intval($_GET['product']) : 0;
+$qty = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
+if ($qty < 1) $qty = 1;
+
+// Validate product
+$stmt = $con->prepare("SELECT pid, pnm, price, img FROM product WHERE pid=? LIMIT 1");
+$stmt->bind_param("i", $pid);
+$stmt->execute();
+$product = $stmt->get_result()->fetch_assoc();
+
+if (!$product) {
+    exit("Product not found");
 }
 
-// Get product data from URL
-$productId = isset($_GET['product']) ? (int)$_GET['product'] : 0;
-$name = isset($_GET['name']) ? trim($_GET['name']) : '';
-$price = isset($_GET['price']) ? (float)$_GET['price'] : 0.0;
-$quantity = isset($_GET['quantity']) ? (int)$_GET['quantity'] : 1;
+// Check cart
+$stmt = $con->prepare("SELECT cart_id, qty FROM add_to_cart WHERE pid=? AND username=?");
+$stmt->bind_param("is", $pid, $username);
+$stmt->execute();
+$res = $stmt->get_result();
 
-// Validate inputs
-if ($productId <= 0 || $price <= 0 || $quantity <= 0 || $name === '') {
-    echo '<div class="message-box">Invalid product data. Please try again.</div>';
-    exit;
-}
+if ($res->num_rows > 0) {
 
-// Initialize cart if not set
-if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = [];
-}
+    $row = $res->fetch_assoc();
+    $newQty = $row['qty'] + $qty;
 
-// Add or update product quantity in cart
-if (isset($_SESSION['cart'][$productId])) {
-    $_SESSION['cart'][$productId]['quantity'] += $quantity;
+    $update = $con->prepare(
+        "UPDATE add_to_cart SET qty=?, cart_date=CURDATE() WHERE cart_id=?"
+    );
+    $update->bind_param("ii", $newQty, $row['cart_id']);
+    $update->execute();
+
 } else {
-    $_SESSION['cart'][$productId] = [
-        'name' => $name,
-        'price' => $price,
-        'quantity' => $quantity
-    ];
+
+    $insert = $con->prepare(
+        "INSERT INTO add_to_cart 
+        (username, pid, pnm, price, img, qty, cart_date)
+        VALUES (?, ?, ?, ?, ?, ?, CURDATE())"
+    );
+
+    $insert->bind_param(
+        "sisdsd",
+        $username,
+        $product['pid'],
+        $product['pnm'],
+        $product['price'],
+        $product['img'],
+        $qty
+    );
+    $insert->execute();
 }
 
-// Optionally show a success message before redirect (commented out)
-// echo '<div class="message-box">Added ' . $quantity . ' x "' . htmlspecialchars($name) . '" to your cart.</div>';
-
-// Redirect to cart page after 1 second delay
-header("refresh:1; url=cart_show.php");
+header("Location: cart_show.php");
 exit;
 ?>
