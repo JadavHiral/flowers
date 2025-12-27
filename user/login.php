@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           setcookie("remember_email", "", time() - 3600);
         }
 
-        header("Location: products.php");
+        header("Location: product.php");
         exit;
       }
     } else {
