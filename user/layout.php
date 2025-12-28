@@ -1,258 +1,204 @@
-
-
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+include_once("db_config.php"); // DB connection for categories
+
 $isLoggedIn = isset($_SESSION['logged_in_user']);
-$username = $isLoggedIn ? ($_SESSION['logged_in_user']['username'] ?? '') : '';
+$username   = $isLoggedIn ? ($_SESSION['logged_in_user']['username'] ?? '') : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🌸 Unique Flower Shop 🌸</title>
+    <meta charset="UTF-8">
+    <title>Flower Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/bootstrap.bundle.min.js"></script>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: 'Open Sans', sans-serif;
-     /* background: linear-gradient(to right, #ffeff7, #fff0f6);*/
-      color: #5a2a4d;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/validate.js"></script>
 
-    body {
-      flex: 1 0 auto;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    main {
-      flex: 1 0 auto;
-      padding: 1rem 1rem 3rem 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 90%;
-    }
-
-    .navbar {
-      background-color: #d6336c; /* pink */
-      box-shadow: 0 3px 8px rgba(214, 51, 108, 0.6);
-      font-weight: 600;
-    }
-
-    .navbar:hover {
-      background-color: #c42d61;
-    }
-
-    .navbar-brand {
-      font-family: 'Pacifico', cursive;
-      font-size: 1.9rem;
-      color: #fff !important;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-    }
-
-    .navbar-nav .nav-link {
-      color: #fff !important;
-      font-weight: 600;
-      transition: color 0.3s ease;
-      position: relative;
-    }
-
-    .navbar-nav .nav-link:hover {
-      color: #ffcce5 !important;
-    }
-
-    .footer {
-      background-color: #f8bbd0;
-      padding: 1rem 0;
-      color: #880e4f;
-      font-weight: 600;
-      text-align: center;
-      margin-top: auto;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
-    }
-
-    .navbar-toggler {
-      border: none;
-      color: white;
-      font-size: 1.4rem;
-    }
-
-    .navbar-toggler:focus {
-      box-shadow: none;
-    }
-
-    .dropdown-menu {
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(214, 51, 108, 0.4);
-      border: 1px solid #d6336c;
-    }
-
-    .dropdown-item {
-      font-weight: 600;
-      color: #5a2a4d;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .dropdown-item:hover {
-      background-color: #ffcce5;
-      color: #d6336c;
-    }
-
-    .nav-icons .nav-link i {
-      color: #fff;
-      font-size: 1.3rem;
-      transition: transform 0.2s ease, color 0.3s ease;
-    }
-
-    .nav-icons .nav-link:hover i {
-      transform: scale(1.25);
-      color: #ffcce5;
-    }
-
-    .dropdown-toggle::after {
-      filter: brightness(0) invert(1);
-      margin-left: 0.3rem;
-    }
-
-    @media (max-width: 575.98px) {
-      .nav-icons {
-        flex-direction: column;      /* stack icons vertically */
-        align-items: flex-start;     /* align to left */
-        gap: 0.5rem;
-        margin-top: 1rem;
-        padding-left: 1rem;          /* small left padding */
-      }
-
-      .nav-icons .nav-item {
-        margin-left: 0 !important;   /* remove default left margin */
-      }
-
-      .dropdown-menu {
-        position: static !important; /* dropdown below button */
-        float: none !important;
-        left: 0 !important;          /* align left */
-        right: auto !important;
-      }
-    }
-  </style>
+    <style>
+        html, body { height: 100%; margin: 0; }
+        body { display: flex; flex-direction: column; }
+        .container-fluid { flex: 1; display: flex; flex-direction: column; }
+        .main-content { flex: 1; }
+        footer { width: 100%; background: #222; color: white; text-align: center; padding: 15px 0; margin: 0; }
+        .navbar .nav-link { color: white !important; }
+        .navbar .nav-link:hover { color: #ff6f91 !important; text-decoration: underline; transition: color 0.3s ease; }
+        .navbar-toggler { border-color: white; }
+        .search-form input, .search-form select { margin-right: 5px; }
+        .btn-pink { background-color: #ff6f91; color: white; }
+        .btn-pink:hover { background-color: #ed6386; color: white; }
+        .row { display:flex; flex-wrap:wrap; justify-content:center; gap:30px; }
+        .card { background:white; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1); text-align:center; padding:20px; width:400px; }
+        .card img { width:350px; height:350px; object-fit:cover; border-radius:8px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card img:hover { transform:scale(1.05); box-shadow:0 6px 12px rgba(0,0,0,0.3); }
+        h5 { margin:10px; color:#222; }
+        .no-results { margin-top:50px; text-align:center; }
+        .no-results p { font-size:18px; margin-bottom:20px; }
+    </style>
 </head>
 
 <body>
+<div class="container-fluid p-0">
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.php">🌸 Unique Flower Shop 🌸</a>
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg bg-black px-3">
+    <a class="navbar-brand fw-bold" href="home.php" style="color:pink;">🌷 Flower Shop</a>
 
-      <!-- Mobile toggle -->
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navMenu"
-        aria-controls="navMenu"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <i class="fas fa-bars"></i>
-      </button>
+    <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="products.php">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
-          <li class="nav-item"><a class="nav-link" href="contact.php">Contact Us</a></li>
-          <li class="nav-item"><a class="nav-link" href="about.php">About Us</a></li>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="home.php">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="category.php">Categories</a></li>
+            <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
+            <li class="nav-item"><a class="nav-link" href="aboutus.php">About Us</a></li>
         </ul>
 
-<!-- Right side icons and user -->
-<ul class="navbar-nav ms-auto mb-2 mb-lg-0 nav-icons align-items-center">
-  <li class="nav-item dropdown">
-    <a
-      class="nav-link dropdown-toggle d-flex align-items-center"
-      href="#"
-      id="userDropdown"
-      role="button"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      <?php if ($isLoggedIn && !empty($_SESSION['logged_in_user']['profile_photo'])) : ?>
-          <img src="profile_photos/<?= htmlspecialchars($_SESSION['logged_in_user']['profile_photo']) ?>" 
-               alt="Profile" 
-               style="width:35px; height:35px; object-fit:cover; border-radius:50%; border:2px solid #fff;">
-      <?php else : ?>
-          <i class="fas fa-user"></i>
-      <?php endif; ?>
-      <span class="ms-2 text-white fw-semibold">
-          <?= $isLoggedIn ? htmlspecialchars($username) : 'Account' ?>
-      </span>
-    </a>
+        <!-- ===== Search Form ===== -->
+        <form class="d-flex search-form me-3" method="GET" action="">
+            <input class="form-control" type="text" name="search" placeholder="Search products..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+            <select class="form-select" name="category">
+                <option value="">All Categories</option>
+                <?php
+                $cats = mysqli_query($con, "SELECT cat_id, cat_nm FROM category ORDER BY cat_nm ASC");
+                while ($cat = mysqli_fetch_assoc($cats)) {
+                    $selected = (isset($_GET['category']) && $_GET['category'] == $cat['cat_id']) ? 'selected' : '';
+                    echo '<option value="'. (int)$cat['cat_id'] .'" '.$selected.'>'. htmlspecialchars($cat['cat_nm']) .'</option>';
+                }
+                ?>
+            </select>
+            <button type="submit" class="btn btn-pink"><i class="fas fa-search"></i></button>
+        </form>
 
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-      <?php if ($isLoggedIn) : ?>
-        <li><a class="dropdown-item" href="dashboard.php">📊 Dashboard</a></li>
-        <li><a class="dropdown-item" href="view_profile.php">👤 Profile</a></li>
-        <li><a class="dropdown-item" href="logout.php">🚪 Logout</a></li>
-      <?php else : ?>
-        <li><a class="dropdown-item" href="register.php">Register</a></li>
-        <li><a class="dropdown-item" href="login.php">Login</a></li>
-      <?php endif; ?>
-    </ul>
-  </li>
+        <!-- ===== Right Icons ===== -->
+        <ul class="navbar-nav align-items-center">
+            <!-- User Dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                    <?php if ($isLoggedIn && !empty($_SESSION['logged_in_user']['profile_photo'])) : ?>
+                        <img src="profile_photos/<?= htmlspecialchars($_SESSION['logged_in_user']['profile_photo']) ?>" style="width:35px;height:35px;border-radius:50%;object-fit:cover;">
+                    <?php else : ?>
+                        <i class="fas fa-user"></i>
+                    <?php endif; ?>
+                    <span class="ms-2"><?= $isLoggedIn ? htmlspecialchars($username) : 'Account' ?></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <?php if ($isLoggedIn) : ?>
+                        <li><a class="dropdown-item" href="dashboard.php">Dashboard</a></li>
+                        <li><a class="dropdown-item" href="view_profile.php">Profile</a></li>
+                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                    <?php else : ?>
+                        <li><a class="dropdown-item" href="login.php">Login</a></li>
+                        <li><a class="dropdown-item" href="register.php">Register</a></li>
+                    <?php endif; ?>
+                </ul>
+            </li>
 
-  <li class="nav-item ms-3">
-    <a href="whishlist.php" class="nav-link" title="Wishlist">
-      <i class="fas fa-heart"></i>
-    </a>
-  </li>
+            <!-- Cart -->
+            <li class="nav-item me-3">
+                <a class="nav-link" href="<?= $isLoggedIn ? 'cart_show.php' : 'login.php' ?>" 
+                   onclick="<?= !$isLoggedIn ? "alert('Please login to view cart');" : '' ?>" title="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                </a>
+            </li>
 
-  <li class="nav-item ms-3">
-    <a href="cart_show.php" class="nav-link" title="Cart">
-      <i class="fas fa-shopping-cart"></i>
-    </a>
-  </li>
-</ul>
-
-
-
-      </div>
+            <!-- Wishlist -->
+            <li class="nav-item me-3">
+                <a class="nav-link" href="<?= $isLoggedIn ? 'whishlist.php' : 'login.php' ?>" 
+                   onclick="<?= !$isLoggedIn ? "alert('Please login to view wishlist');" : '' ?>" title="Wishlist">
+                    <i class="fas fa-heart"></i>
+                </a>
+            </li>
+        </ul>
     </div>
-  </nav>
+</nav>
 
-  <!-- Main Content -->
-  <main>
-    <?php
+<!-- ================= CONTENT ================= -->
+<div class="main-content p-3">
+<?php
+// Display dynamic search results
+if (isset($_GET['search']) || isset($_GET['category'])) {
+    $searchTerm = trim($_GET['search'] ?? '');
+    $categoryId = intval($_GET['category'] ?? 0);
+
+    $sql = "SELECT p.pid, p.pnm, p.img, s.sub_cat_nm 
+            FROM product p 
+            LEFT JOIN sub_category s ON p.sub_cat_id = s.sub_cat_id
+            WHERE 1";
+
+    $params = [];
+    $types = "";
+
+    if ($searchTerm !== '') {
+        $sql .= " AND p.pnm LIKE ?";
+        $types .= "s";
+        $params[] = "%$searchTerm%";
+    }
+
+    if ($categoryId > 0) {
+        $sql .= " AND p.sub_cat_id IN (SELECT sub_cat_id FROM sub_category WHERE cat_id=?)";
+        $types .= "i";
+        $params[] = $categoryId;
+    }
+
+    $stmt = $con->prepare($sql);
+
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+
+    $stmt->execute();
+    $res = $stmt->get_result();
+
+    echo '<h2 class="text-center mb-4">Search Results</h2>';
+
+    if ($res && $res->num_rows > 0) {
+        echo '<div class="row">';
+        while ($row = $res->fetch_assoc()) {
+            echo '<div class="card">';
+            echo '<img src="'.htmlspecialchars($row['img']).'" alt="'.htmlspecialchars($row['pnm']).'">';
+            echo '<h5>'.htmlspecialchars($row['pnm']).'</h5>';
+            echo '<p>'.htmlspecialchars($row['sub_cat_nm']).'</p>';
+            echo '<a href="p_description.php?id='.$row['pid'].'" class="btn btn-pink">View Details</a>';
+            echo '</div>';
+        }
+        echo '</div>';
+    } else {
+        echo '<div class="no-results">';
+        echo '<p>No matching products found.</p>';
+        echo '<a href="home.php" class="btn btn-pink">Back to Products</a>';
+        echo '</div>';
+    }
+} else {
+    // Show normal content if no search
     if (isset($title_page)) echo $title_page;
-    if (isset($Content1)) echo $Content1;
-    ?>
-  </main>
+    if (isset($content1)) echo $content1;
+}
+?>
+</div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    &copy; 2025 Unique Flower Shop. All rights reserved.
-  </footer>
+<!-- ================= FOOTER ================= -->
+<footer>
+    © 2025 Flower Shop | Designed by
+    Jagruti Sagathiya · Hiral Jadav · Diya Apte
+</footer>
 
-  <!-- Bootstrap Bundle JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</div>
 </body>
 </html>
